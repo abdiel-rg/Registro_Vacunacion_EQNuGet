@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using DevelopersDo.DataAnnotations;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -13,6 +14,7 @@ namespace Registro_Vacunacion_EQNuGet.Models
         [Required]
         [MinLength(11)]
         [MaxLength(11)]
+        [Cedula]
         public string Cedula { get; set; }
 
         [Required]
@@ -21,20 +23,20 @@ namespace Registro_Vacunacion_EQNuGet.Models
         [Required]
         public string Apellido { get; set; }
 
-        [Phone]
         [Required]
+        [MSISDN]
         public string Telefono { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]
-        public DateTime FechaNacimiento { get; set; }
+        public DateTime? FechaNacimiento { get; set; }
 
         [Required]
         public int VacunaRecibida { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]
-        public DateTime FechaPrimeraDosis { get; set; }
+        public DateTime? FechaPrimeraDosis { get; set; }
 
         [DataType(DataType.DateTime)]
         public DateTime? FechaSegundaDosis { get; set; }
