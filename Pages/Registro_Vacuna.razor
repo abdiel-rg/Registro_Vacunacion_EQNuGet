@@ -1,3 +1,131 @@
 @page "/registrovacuna"
+@using System.Text.Json
+@using System.Net.Http.Json;
+@using Registro_Vacunacion_EQNuGet.Data
+@using Registro_Vacunacion_EQNuGet.Models
+@inject HttpClient http
 
-//Aqui se registraran las vacunas
+<h1>Registro de Vacuna</h1>
+
+<EditForm Model="persona">
+
+    @if (validation)
+    {
+        <DataAnnotationsValidator />
+    }
+
+    <div class="container">
+
+        <div class="row">
+
+            <label class="form-label">C&eacute;dula</label>
+            <div class="input-group mb-4">
+                <InputText @bind-Value="persona.Cedula" class="form-control" />
+                <button class="ml-5 btn btn-primary" @onclick="GetPersonaByCedula">Verificar C&eacute;dula</button>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-lg-6">
+
+                <label class="form-label">Nombre</label>
+                <div class="input-group mb-4">
+                    <InputText @bind-Value="persona.Nombre" class="form-control" disabled="@cedulaAPI.Ok" />
+                </div>
+
+                <label class="form-label">Apellido</label>
+                <div class="input-group  mb-4">
+                    <InputText @bind-Value="persona.Apellido" class="form-control" disabled="@cedulaAPI.Ok" />
+                </div>
+
+                <label class="form-label">Tel&eacute;fono</label>
+                <div class="input-group mb-4 ">
+                    <InputText @bind-Value="persona.Telefono" class="form-control" />
+                </div>
+
+                <label class="form-label">Fecha de Nacimiento</label>
+                <div class="input-group mb-4">
+                    <InputDate type="datetime-local" @bind-Value="persona.FechaNacimiento" class="form-control" disabled="@cedulaAPI.Ok" />
+                </div>
+
+                <label class="form-label">Provincia</label>
+                <div class="input-group mb-4">
+                    <InputSelect @bind-Value="persona.Provincia" type="text" class="form-control" disabled="@cedulaAPI.Ok">
+                        @foreach (var provincia in db.Provincias)
+                        {
+                            <option value="@provincia.Id">@provincia.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <label class="form-label">Vacuna Recibida</label>
+                <div class="input-group mb-4">
+                    <InputSelect @bind-Value="persona.VacunaRecibida" type="text" class="form-control">
+                        @foreach (var vacuna in db.Vacunas)
+                        {
+                            <option value="@vacuna.Id">@vacuna.Marca</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <label class="form-label">Fecha de la Primera Dosis</label>
+                <div class="input-group mb-4">
+                    <InputDate @bind-Value="persona.FechaPrimeraDosis" @bind-Value:format="dd MM yyyy" class="form-control" />
+                </div>
+
+                <label class="form-label">Fecha de la Segunda Dosis</label>
+                <div class="input-group mb-4">
+                    <InputDate @bind-Value="persona.FechaSegundaDosis" class="form-control" />
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code {
+    sistemavacunacionContext db = new();
+
+    CedulaAPI cedulaAPI = new()
+    {
+        Ok = false
+    };
+
+    bool validation = false;
+
+    Personas persona = new()
+    {
+        FechaNacimiento = DateTime.UnixEpoch,
+        FechaPrimeraDosis = DateTime.Today
+    };
+
+    async void GetPersonaByCedula()
+    {
+        validation = false;
+        this.StateHasChanged();
+
+        cedulaAPI = await http.GetFromJsonAsync<CedulaAPI>($"https://api.adamix.net/apec/cedula/{persona.Cedula}");
+
+
+        if (cedulaAPI.Ok)
+        {
+            persona.Nombre = cedulaAPI.Nombres;
+            persona.Apellido = $"{cedulaAPI.Apellido1} {cedulaAPI.Apellido2}";
+            persona.FechaNacimiento = DateTime.Parse(cedulaAPI.FechaNacimiento);
+        }
+
+        this.StateHasChanged();
+        validation = true;
+
+    }
+
+}
