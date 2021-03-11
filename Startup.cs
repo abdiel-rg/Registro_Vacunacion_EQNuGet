@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Registro_Vacunacion_EQNuGet.Models;
 
 namespace Registro_Vacunacion_EQNuGet
 {
@@ -28,7 +29,7 @@ namespace Registro_Vacunacion_EQNuGet
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<sistemavacunacionContext>();
             services.AddHttpClient();
         }
 

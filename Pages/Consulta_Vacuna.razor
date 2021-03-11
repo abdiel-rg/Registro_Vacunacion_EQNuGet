@@ -1,7 +1,47 @@
 @page "/consultavacuna"
 
-//Aqui se consultaran las vacunas, y los tres listados:
+<h3>Listado de Vacunados por Personas</h3>
+<br>
+<center>
+    <input type="text" placeholder="Escriba nombre y apellido del vacunado o vacunada" @bind-value="BuscarN" @bind-value:event="oninput">
+</center>
+<span class="text-muted">
+    Showing @Filtro.Count out of @GetPersonas().Count
+</span>
 
-<h3>Listado de Vacunados por Provincia</h3>
-<h3>Listado de Vacunados por marca de Vacuna</h3>
-<h3>Listado de Vacunados por Mes</h3>
+<table class= "table table-bordered table-dark">
+    <thead>
+        <tr>
+            <th>Cedula</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Telefono</th>
+            <th>Vacuna Recibida</th>
+            <th>Provincia</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var per in @Filtro)
+        {
+        
+        <tr>
+            <td>@per.Cedula</td>
+            <td>@per.Nombre</td>
+            <td>@per.Apellido</td>
+            <td>@per.Telefono</td>
+            <td>@per.VacunaRecibida</td>
+            <td>@per.Provincia</td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    string BuscarN { get; set;} = "";
+    
+    List<Personas> GetPersonas() => svc.Personas.ToList();
+
+        List<Personas> Filtro => GetPersonas().Where(p => p.Nombre.ToLower().Contains(BuscarN.ToLower()) || p.Apellido.ToLower().Contains(BuscarN.ToLower())).ToList();
+    
+}

@@ -24,3 +24,4 @@ namespace Registro_Vacunacion_EQNuGet
                 });
     }
 }
+

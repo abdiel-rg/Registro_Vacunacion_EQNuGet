@@ -1,0 +1,92 @@
+@page "/listadovacuna"
+@using Models;
+
+#region
+<h3>Listado de Vacunados por Personas</h3>
+<br>
+<table class= "table table-bordered table-dark">
+    <thead>
+        <tr>
+            <th>Cedula</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Telefono</th>
+            <th>Fecha de Nacimiento</th>
+            <th>Vacuna Recibida</th>
+            <th>Primera Fecha de Dosis</th>
+            <th>Segunda Fecha de Dosis</th>
+            <th>Provincia</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var per in @GetPersonas())
+        {
+        
+        <tr>
+            <td>@per.Cedula</td>
+            <td>@per.Nombre</td>
+            <td>@per.Apellido</td>
+            <td>@per.Telefono</td>
+            <td>@per.FechaNacimiento</td>
+            <td>@per.VacunaRecibida</td>
+            <td>@per.FechaPrimeraDosis</td>
+            <td>@per.FechaSegundaDosis</td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+
+<h3>Listado de Vacunados por Provincias</h3>
+<br>
+<table class= "table table-bordered table-dark">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Vacunado</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var prov in @GetProvincias())
+        {
+        
+        <tr>
+            <td>@prov.Id</td>
+            <td>@prov.Nombre</td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+
+<h3>Listado de Vacunados por Vacunas</h3>
+<br>
+<table class= "table table-bordered table-dark">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Marca</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var vac in @GetVacunas())
+        {
+        
+        <tr>
+            <td>@vac.Id</td>
+            <td>@vac.Marca</td>
+            <td>@vac.Cantidad</td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+
+@code{
+    List<Personas> GetPersonas() => svc.Personas.ToList();
+   List<Provincias> GetProvincias() => svc.Provincias.ToList();
+   List<Vacunas> GetVacunas() => svc.Vacunas.ToList();
+}
