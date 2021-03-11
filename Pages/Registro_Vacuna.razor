@@ -1,6 +1,4 @@
 @page "/registrovacuna"
-@using Registro_Vacunacion_EQNuGet.Data
-@using Registro_Vacunacion_EQNuGet.Models
 
 <h1>Registro de Vacuna</h1>
 
@@ -47,7 +45,7 @@
                 <label class="form-label">Provincia</label>
                 <div class="input-group mb-4">
                     <InputSelect @bind-Value="persona.Provincia" class="form-control" disabled="@FoundOnDB">
-                        @foreach (var provincia in db.Provincias.OrderBy(p => p.Nombre))
+                        @foreach (var provincia in svc.Provincias.OrderBy(p => p.Nombre))
                         {
                             <option value="@provincia.Id">@provincia.Nombre</option>
                         }
@@ -61,8 +59,7 @@
                 <label class="form-label">Vacuna Recibida</label>
                 <div class="input-group mb-4">
                     <InputSelect @bind-Value="persona.VacunaRecibida" class="form-control" disabled="@FoundOnDB">
-                        @foreach (var vacuna in db.Vacunas.Where(v => v.Cantidad > 0)
-                        .OrderBy(v => v.Marca))
+                        @foreach (var vacuna in svc.Vacunas.Where(v => v.Cantidad > 0).OrderBy(v => v.Marca))
                         {
                             <option value="@vacuna.Id">@vacuna.Marca (@vacuna.Cantidad.ToString("N0"))</option>
                         }
@@ -88,19 +85,24 @@
 </EditForm>
 
 @code {
-    Personas persona = new()
-    {
-        Cedula = "",
-        VacunaRecibida = 0,
-        Provincia = 0
-    };
+    Personas persona = new();
 
     CedulaAPI cedulaAPI = new() { Ok = true };
 
     bool FoundOnDB;
     bool FoundOnAPI;
 
-    sistemavacunacionContext db = new();
+    void ResetForm(string cedula = "")
+    {
+        persona = new()
+        {
+            Cedula = cedula,
+            VacunaRecibida = 0,
+            Provincia = 0
+        };
+
+        this.StateHasChanged();
+    }
 
     async void GetPersonaByCedula()
     {
@@ -109,7 +111,7 @@
 
         if (persona.Cedula.Length == 11)
         {
-            var query = db.Personas.Where(p => p.Cedula == persona.Cedula);
+            var query = svc.Personas.Where(p => p.Cedula == persona.Cedula);
 
             if (query.Count() == 1)
             {
@@ -134,15 +136,18 @@
 
             if (!FoundOnAPI && !FoundOnDB)
             {
-                persona = new()
-                {
-                    Cedula = persona.Cedula,
-                    VacunaRecibida = 0,
-                    Provincia = 0
-                };
+                ResetForm(persona.Cedula);
             }
         }
 
         this.StateHasChanged();
+    }
+
+    async protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InvokeAsync(() => ResetForm());
+        }
     }
 }
