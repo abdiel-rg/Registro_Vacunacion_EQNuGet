@@ -3,11 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace Registro_Vacunacion_EQNuGet.Data
 {
     public class CedulaAPI
     {
+        public async static Task<CedulaAPI> GetCedula(string cedula)
+        {
+            using HttpClient http = new();
+            if (string.IsNullOrWhiteSpace(cedula)) cedula = "0";
+            return await http.GetFromJsonAsync<CedulaAPI>($"https://api.adamix.net/apec/cedula/{cedula}");
+        }
+
         [JsonPropertyName("Cedula")]
         public string Cedula { get; set; }
 

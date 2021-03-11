@@ -1,9 +1,6 @@
 @page "/registrovacuna"
-@using System.Text.Json
-@using System.Net.Http.Json;
 @using Registro_Vacunacion_EQNuGet.Data
 @using Registro_Vacunacion_EQNuGet.Models
-@inject HttpClient http
 
 <h1>Registro de Vacuna</h1>
 
@@ -118,7 +115,7 @@
 
             if (query.Count() == 0)
             {
-                cedulaAPI = await http.GetFromJsonAsync<CedulaAPI>($"https://api.adamix.net/apec/cedula/{persona.Cedula}");
+                cedulaAPI = await CedulaAPI.GetCedula(persona.Cedula);
 
                 if (cedulaAPI.Ok)
                 {
