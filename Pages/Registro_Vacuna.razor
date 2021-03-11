@@ -9,10 +9,7 @@
 
 <EditForm Model="persona">
 
-    @if (validation)
-    {
-        <DataAnnotationsValidator />
-    }
+    <DataAnnotationsValidator />
 
     <div class="container">
 
@@ -21,7 +18,7 @@
             <label class="form-label">C&eacute;dula</label>
             <div class="input-group mb-4">
                 <InputText @bind-Value="persona.Cedula" class="form-control" />
-                <button class="ml-5 btn btn-primary" @onclick="GetPersonaByCedula">Verificar C&eacute;dula</button>
+                <button type="button" @onclick="GetPersonaByCedula" class="ml-5 btn btn-primary">Verificar C&eacute;dula</button>
             </div>
 
         </div>
@@ -32,28 +29,28 @@
 
                 <label class="form-label">Nombre</label>
                 <div class="input-group mb-4">
-                    <InputText @bind-Value="persona.Nombre" class="form-control" disabled="@cedulaAPI.Ok" />
+                    <InputText @bind-Value="persona.Nombre" class="form-control" disabled="@(FoundOnDB || FoundOnAPI)" />
                 </div>
 
                 <label class="form-label">Apellido</label>
                 <div class="input-group  mb-4">
-                    <InputText @bind-Value="persona.Apellido" class="form-control" disabled="@cedulaAPI.Ok" />
+                    <InputText @bind-Value="persona.Apellido" class="form-control" disabled="@(FoundOnDB || FoundOnAPI)" />
                 </div>
 
                 <label class="form-label">Tel&eacute;fono</label>
                 <div class="input-group mb-4 ">
-                    <InputText @bind-Value="persona.Telefono" class="form-control" />
+                    <InputText @bind-Value="persona.Telefono" class="form-control" disabled="@FoundOnDB" />
                 </div>
 
                 <label class="form-label">Fecha de Nacimiento</label>
                 <div class="input-group mb-4">
-                    <InputDate type="datetime-local" @bind-Value="persona.FechaNacimiento" class="form-control" disabled="@cedulaAPI.Ok" />
+                    <InputDate type="datetime-local" @bind-Value="persona.FechaNacimiento" class="form-control" disabled="@(FoundOnDB || FoundOnAPI)" />
                 </div>
 
                 <label class="form-label">Provincia</label>
                 <div class="input-group mb-4">
-                    <InputSelect @bind-Value="persona.Provincia" type="text" class="form-control" disabled="@cedulaAPI.Ok">
-                        @foreach (var provincia in db.Provincias)
+                    <InputSelect @bind-Value="persona.Provincia" type="text" class="form-control" disabled="@FoundOnDB">
+                        @foreach (var provincia in db.Provincias.OrderBy(p => p.Nombre))
                         {
                             <option value="@provincia.Id">@provincia.Nombre</option>
                         }
@@ -66,22 +63,23 @@
 
                 <label class="form-label">Vacuna Recibida</label>
                 <div class="input-group mb-4">
-                    <InputSelect @bind-Value="persona.VacunaRecibida" type="text" class="form-control">
-                        @foreach (var vacuna in db.Vacunas)
+                    <InputSelect @bind-Value="persona.VacunaRecibida" type="text" class="form-control" disabled="@FoundOnDB">
+                        @foreach (var vacuna in db.Vacunas.Where(v => v.Cantidad > 0)
+                        .OrderBy(v => v.Marca))
                         {
-                            <option value="@vacuna.Id">@vacuna.Marca</option>
+                            <option value="@vacuna.Id">@vacuna.Marca (@vacuna.Cantidad.ToString("N0"))</option>
                         }
                     </InputSelect>
                 </div>
 
                 <label class="form-label">Fecha de la Primera Dosis</label>
                 <div class="input-group mb-4">
-                    <InputDate @bind-Value="persona.FechaPrimeraDosis" @bind-Value:format="dd MM yyyy" class="form-control" />
+                    <InputDate @bind-Value="persona.FechaPrimeraDosis" @bind-Value:format="dd MM yyyy" class="form-control" disabled="@FoundOnDB" />
                 </div>
 
                 <label class="form-label">Fecha de la Segunda Dosis</label>
                 <div class="input-group mb-4">
-                    <InputDate @bind-Value="persona.FechaSegundaDosis" class="form-control" />
+                    <InputDate @bind-Value="persona.FechaSegundaDosis" class="form-control" disabled="@(FoundOnDB && persona.FechaSegundaDosis.HasValue)" />
                 </div>
 
             </div>
@@ -93,39 +91,54 @@
 </EditForm>
 
 @code {
+    Personas persona = new() { Cedula = "" };
+
+    CedulaAPI cedulaAPI = new() { Ok = true };
+    
+    bool FoundOnDB;
+    bool FoundOnAPI;
+
     sistemavacunacionContext db = new();
-
-    CedulaAPI cedulaAPI = new()
-    {
-        Ok = false
-    };
-
-    bool validation = false;
-
-    Personas persona = new()
-    {
-        FechaNacimiento = DateTime.UnixEpoch,
-        FechaPrimeraDosis = DateTime.Today
-    };
 
     async void GetPersonaByCedula()
     {
-        validation = false;
-        this.StateHasChanged();
+        FoundOnAPI = false;
+        FoundOnDB = false;
 
-        cedulaAPI = await http.GetFromJsonAsync<CedulaAPI>($"https://api.adamix.net/apec/cedula/{persona.Cedula}");
-
-
-        if (cedulaAPI.Ok)
+        if (persona.Cedula.Length == 11)
         {
-            persona.Nombre = cedulaAPI.Nombres;
-            persona.Apellido = $"{cedulaAPI.Apellido1} {cedulaAPI.Apellido2}";
-            persona.FechaNacimiento = DateTime.Parse(cedulaAPI.FechaNacimiento);
+            var query = db.Personas.Where(p => p.Cedula == persona.Cedula);
+
+            if (query.Count() == 1)
+            {
+                persona = query.First();
+                FoundOnDB = true;
+                FoundOnAPI = false;
+            }
+
+            if (query.Count() == 0)
+            {
+                cedulaAPI = await http.GetFromJsonAsync<CedulaAPI>($"https://api.adamix.net/apec/cedula/{persona.Cedula}");
+
+                if (cedulaAPI.Ok)
+                {
+                    persona.Nombre = cedulaAPI.Nombres;
+                    persona.Apellido = $"{cedulaAPI.Apellido1} {cedulaAPI.Apellido2}";
+                    persona.FechaNacimiento = DateTime.Parse(cedulaAPI.FechaNacimiento);
+                    FoundOnAPI = true;
+                    FoundOnDB = false;
+                }
+            }
+
+            if (!FoundOnAPI && !FoundOnDB)
+            {
+                persona = new()
+                {
+                    Cedula = persona.Cedula
+                };
+            }
         }
 
         this.StateHasChanged();
-        validation = true;
-
     }
-
 }
