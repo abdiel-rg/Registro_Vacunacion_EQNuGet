@@ -41,12 +41,12 @@
 
                 <label class="form-label">Fecha de Nacimiento</label>
                 <div class="input-group mb-4">
-                    <InputDate type="datetime-local" @bind-Value="persona.FechaNacimiento" class="form-control" disabled="@(FoundOnDB || FoundOnAPI)" />
+                    <InputDate @bind-Value="persona.FechaNacimiento" class="form-control" disabled="@(FoundOnDB || FoundOnAPI)" />
                 </div>
 
                 <label class="form-label">Provincia</label>
                 <div class="input-group mb-4">
-                    <InputSelect @bind-Value="persona.Provincia" type="text" class="form-control" disabled="@FoundOnDB">
+                    <InputSelect @bind-Value="persona.Provincia" class="form-control" disabled="@FoundOnDB">
                         @foreach (var provincia in db.Provincias.OrderBy(p => p.Nombre))
                         {
                             <option value="@provincia.Id">@provincia.Nombre</option>
@@ -60,7 +60,7 @@
 
                 <label class="form-label">Vacuna Recibida</label>
                 <div class="input-group mb-4">
-                    <InputSelect @bind-Value="persona.VacunaRecibida" type="text" class="form-control" disabled="@FoundOnDB">
+                    <InputSelect @bind-Value="persona.VacunaRecibida" class="form-control" disabled="@FoundOnDB">
                         @foreach (var vacuna in db.Vacunas.Where(v => v.Cantidad > 0)
                         .OrderBy(v => v.Marca))
                         {
@@ -71,7 +71,7 @@
 
                 <label class="form-label">Fecha de la Primera Dosis</label>
                 <div class="input-group mb-4">
-                    <InputDate @bind-Value="persona.FechaPrimeraDosis" @bind-Value:format="dd MM yyyy" class="form-control" disabled="@FoundOnDB" />
+                    <InputDate @bind-Value="persona.FechaPrimeraDosis" class="form-control" disabled="@FoundOnDB" />
                 </div>
 
                 <label class="form-label">Fecha de la Segunda Dosis</label>
@@ -88,10 +88,15 @@
 </EditForm>
 
 @code {
-    Personas persona = new() { Cedula = "" };
+    Personas persona = new()
+    {
+        Cedula = "",
+        VacunaRecibida = 0,
+        Provincia = 0
+    };
 
     CedulaAPI cedulaAPI = new() { Ok = true };
-    
+
     bool FoundOnDB;
     bool FoundOnAPI;
 
