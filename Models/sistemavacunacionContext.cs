@@ -38,9 +38,9 @@ namespace Registro_Vacunacion_EQNuGet.Models
         {
             modelBuilder.Entity<Personas>(entity =>
             {
-                entity.HasKey(e => new { e.Cedula, e.VacunaRecibida, e.Provincia })
+                entity.HasKey(e => new { e.Cedula, e.Provincia })
                     .HasName("PRIMARY")
-                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0, 0 });
+                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
                 entity.ToTable("personas");
 
@@ -55,11 +55,9 @@ namespace Registro_Vacunacion_EQNuGet.Models
                     .HasName("fk_Personas_Vacunas_idx");
 
                 entity.Property(e => e.Cedula)
-                    .HasColumnType("varchar(11)")
+                    .HasColumnType("char(11)")
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
-
-                entity.Property(e => e.VacunaRecibida).HasColumnType("int(11)");
 
                 entity.Property(e => e.Provincia).HasColumnType("int(11)");
 
@@ -83,9 +81,11 @@ namespace Registro_Vacunacion_EQNuGet.Models
 
                 entity.Property(e => e.Telefono)
                     .IsRequired()
-                    .HasColumnType("varchar(10)")
+                    .HasColumnType("char(10)")
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.VacunaRecibida).HasColumnType("int(11)");
 
                 entity.HasOne(d => d.ProvinciaNavigation)
                     .WithMany(p => p.Personas)
@@ -96,7 +96,6 @@ namespace Registro_Vacunacion_EQNuGet.Models
                 entity.HasOne(d => d.VacunaRecibidaNavigation)
                     .WithMany(p => p.Personas)
                     .HasForeignKey(d => d.VacunaRecibida)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_Personas_Vacunas");
             });
 

@@ -32,7 +32,7 @@ namespace Registro_Vacunacion_EQNuGet.Models
         public DateTime? FechaNacimiento { get; set; }
 
         [Required]
-        public int VacunaRecibida { get; set; }
+        public int? VacunaRecibida { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]
@@ -45,7 +45,6 @@ namespace Registro_Vacunacion_EQNuGet.Models
         public int Provincia { get; set; }
 
         public virtual Provincias ProvinciaNavigation { get; set; }
-
         public virtual Vacunas VacunaRecibidaNavigation { get; set; }
     }
 }
