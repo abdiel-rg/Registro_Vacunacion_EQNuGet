@@ -1,4 +1,18 @@
 @page "/consultavacuna"
+@using Registro_Vacunacion_EQNuGet.Models
+
+@{
+    var GetPersonas = from per in db.Personas
+                      join pro in db.Provincias
+                      on per.Provincia equals pro.Id
+                      select new
+                      {
+                          Personas = per,
+                          Provincias = pro,
+                      };
+
+    var Filtro = GetPersonas.Where(p => p.Personas.Nombre.ToLower().Contains(BuscarN.ToLower()) || p.Personas.Apellido.ToLower().Contains(BuscarN.ToLower()));
+}
 
 <h3>Listado de Vacunados por Personas</h3>
 <br>
@@ -6,12 +20,13 @@
     <input type="text" placeholder="Escriba nombre y apellido del vacunado o vacunada" @bind-value="BuscarN" @bind-value:event="oninput">
 </center>
 <span class="text-muted">
-    Showing @Filtro.Count out of @GetPersonas().Count
+    Showing @Filtro.Count() out of @GetPersonas.Count()
 </span>
 
-<table class= "table table-bordered table-dark">
+<table class="table table-bordered table-dark">
     <thead>
         <tr>
+
             <th>Cedula</th>
             <th>Nombre</th>
             <th>Apellido</th>
@@ -21,27 +36,25 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var per in @Filtro)
+        @foreach (var per in Filtro)
         {
-        
-        <tr>
-            <td>@per.Cedula</td>
-            <td>@per.Nombre</td>
-            <td>@per.Apellido</td>
-            <td>@per.Telefono</td>
-            <td>@per.VacunaRecibida</td>
-            <td>@per.Provincia</td>
-        </tr>
+
+            <tr>
+                <td>@per.Personas.Cedula</td>
+                <td>@per.Personas.Nombre</td>
+                <td>@per.Personas.Apellido</td>
+                <td>@per.Personas.Telefono</td>
+                <td>@per.Personas.VacunaRecibida</td>
+                <td>@per.Provincias.Nombre</td>
+            </tr>
         }
     </tbody>
 </table>
 
 @code
 {
-    string BuscarN { get; set;} = "";
-    
-    List<Personas> GetPersonas() => svc.Personas.ToList();
+    sistemavacunacionContext db = new();
 
-        List<Personas> Filtro => GetPersonas().Where(p => p.Nombre.ToLower().Contains(BuscarN.ToLower()) || p.Apellido.ToLower().Contains(BuscarN.ToLower())).ToList();
-    
+    string BuscarN { get; set; } = "";
+
 }
