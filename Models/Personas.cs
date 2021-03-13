@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DevelopersDo.DataAnnotations;
+using FoolProof.Core;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -28,20 +29,22 @@ namespace Registro_Vacunacion_EQNuGet.Models
         public string Telefono { get; set; }
 
         [Required]
-        [DataType(DataType.DateTime)]
+        [DataType(DataType.Date)]
         public DateTime? FechaNacimiento { get; set; }
 
-        [Required]
+        [RequiredIfEmpty("VacunaRecibida")]
+        [Range(1, int.MaxValue)]
         public int? VacunaRecibida { get; set; }
 
-        [Required]
-        [DataType(DataType.DateTime)]
+        [RequiredIfNotEmpty("VacunaRecibida")]
+        [DataType(DataType.Date)]
         public DateTime? FechaPrimeraDosis { get; set; }
 
-        [DataType(DataType.DateTime)]
+        [DataType(DataType.Date)]
         public DateTime? FechaSegundaDosis { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue)]
         public int Provincia { get; set; }
 
         public virtual Provincias ProvinciaNavigation { get; set; }

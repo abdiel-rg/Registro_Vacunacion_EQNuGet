@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Registro_Vacunacion_EQNuGet.Models;
+using FoolProof.Core;
 
 namespace Registro_Vacunacion_EQNuGet
 {
@@ -29,8 +30,8 @@ namespace Registro_Vacunacion_EQNuGet
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<sistemavacunacionContext>();
             services.AddHttpClient();
+            services.AddFoolProof();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
