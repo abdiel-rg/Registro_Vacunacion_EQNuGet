@@ -1,6 +1,7 @@
 @page "/registrovacuna"
-@inject NavigationManager NavManager
 @using Registro_Vacunacion_EQNuGet.Data
+@using Registro_Vacunacion_EQNuGet.Models
+@inject NavigationManager NavManager
 
 <h1>Registro de Vacuna</h1>
 
@@ -8,21 +9,16 @@
 
     <DataAnnotationsValidator />
 
-    <div class="container">
-
-        <div class="row col-12">
-
-            <label class="form-label">C&eacute;dula</label>
-            <div class="input-group mb-3">
-                <InputText @bind-Value="persona.Cedula" class="form-control" />
-                <button type="button" @onclick="GetPersonaByCedula" class="ml-5 btn btn-primary">Verificar C&eacute;dula</button>
-            </div>
-
-        </div>
+    <div class="container-fluid">
 
         <div class="row">
 
-            <div class="col-lg-6">
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+
+                <label class="form-label">C&eacute;dula</label>
+                <div class="input-group mb-3">
+                    <InputText @bind-Value="persona.Cedula" class="form-control w-120" @onfocusout="GetPersonaByCedula" />
+                </div>
 
                 <label class="form-label">Nombre</label>
                 <div class="input-group mb-3">
@@ -33,6 +29,10 @@
                 <div class="input-group  mb-3">
                     <InputText @bind-Value="persona.Apellido" class="form-control" disabled="@(FoundOnDB || FoundOnAPI)" />
                 </div>
+
+            </div>
+
+            <div class="col-lg-4 col-sm-6 col-xs-12">
 
                 <label class="form-label">Tel&eacute;fono</label>
                 <div class="input-group mb-3 ">
@@ -47,7 +47,7 @@
                 <label class="form-label">Provincia</label>
                 <div class="input-group mb-3">
                     <InputSelect @bind-Value="persona.Provincia" class="form-control" disabled="@FoundOnDB">
-                        @foreach (var provincia in db.Provincias.OrderBy(p => p.Nombre))
+                        @foreach (var provincia in new sistemavacunacionContext().Provincias.OrderBy(p => p.Nombre))
                         {
                             <option value="@provincia.Id">@provincia.Nombre</option>
                         }
@@ -56,12 +56,12 @@
 
             </div>
 
-            <div class="col-lg-6">
+            <div class="col-lg-4 col-xs-12">
 
                 <label class="form-label">Vacuna Recibida</label>
                 <div class="input-group mb-3">
-                    <InputSelect @bind-Value="persona.VacunaRecibida" class="form-control" disabled="@FoundOnDB">
-                        @foreach (var vacuna in db.Vacunas.Where(v => v.Cantidad > 0).OrderBy(v => v.Marca))
+                    <InputSelect @bind-Value="persona.VacunaRecibida" class="form-control" disabled="@(FoundOnDB && persona.VacunaRecibida.HasValue && persona.VacunaRecibida != 0)">
+                        @foreach (var vacuna in new sistemavacunacionContext().Vacunas.Where(v => v.Cantidad > 0).OrderBy(v => v.Marca))
                         {
                             <option value="@vacuna.Id">@vacuna.Marca (@vacuna.Cantidad.ToString("N0"))</option>
                         }
@@ -70,7 +70,7 @@
 
                 <label class="form-label">Fecha de la Primera Dosis</label>
                 <div class="input-group mb-3">
-                    <InputDate @bind-Value="persona.FechaPrimeraDosis" class="form-control" disabled="@FoundOnDB" />
+                    <InputDate @bind-Value="persona.FechaPrimeraDosis" class="form-control" disabled="@(FoundOnDB && persona.FechaPrimeraDosis.HasValue)" />
                 </div>
 
                 <label class="form-label">Fecha de la Segunda Dosis</label>
@@ -91,8 +91,6 @@
 </EditForm>
 
 @code {
-    sistemavacunacionContext db = new();
-
     Personas persona = new();
 
     CedulaAPI cedulaAPI = new() { Ok = true };
@@ -104,17 +102,27 @@
     {
         using sistemavacunacionContext db = new();
 
+        var vacunaFromDB = db.Vacunas.Where(v => v.Id == persona.VacunaRecibida).First();
+
         if (FoundOnDB)
         {
             var personaToSave = db.Personas.Where(p => p.Cedula == persona.Cedula).First();
-            personaToSave.VacunaRecibida = persona.VacunaRecibida;
-            personaToSave.FechaPrimeraDosis = persona.FechaPrimeraDosis;
-            personaToSave.FechaSegundaDosis = persona.FechaSegundaDosis;
+            var personaFromDB = new sistemavacunacionContext().Personas.Where(p => p.Cedula == persona.Cedula).ToList()[0];
+
+            if (!personaFromDB.FechaSegundaDosis.HasValue || !personaFromDB.VacunaRecibida.HasValue)
+            {
+                vacunaFromDB.Cantidad--;
+                personaToSave.VacunaRecibida = persona.VacunaRecibida;
+                personaToSave.FechaPrimeraDosis = persona.FechaPrimeraDosis;
+                personaToSave.FechaSegundaDosis = persona.FechaSegundaDosis;
+            }
         }
-        else
+        else if (FoundOnAPI || !FoundOnAPI)
         {
             db.Add(persona);
+            vacunaFromDB.Cantidad--;
         }
+        else { }
 
         await db.SaveChangesAsync();
 
@@ -133,18 +141,20 @@
         this.StateHasChanged();
     }
 
-    async void GetPersonaByCedula()
+    async Task GetPersonaByCedula()
     {
         FoundOnAPI = false;
         FoundOnDB = false;
 
         if (persona.Cedula.Length == 11)
         {
-            var query = db.Personas.Where(p => p.Cedula == persona.Cedula);
+            var query = new sistemavacunacionContext().Personas.Where(p => p.Cedula == persona.Cedula);
 
             if (query.Count() == 1)
             {
                 persona = query.First();
+                persona.VacunaRecibida = persona.VacunaRecibida ?? 0;
+
                 FoundOnDB = true;
                 FoundOnAPI = false;
             }

@@ -19,7 +19,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var per in @GetPersonas())
+        @* @foreach(var per in @GetPersonas())
         {
         
         <tr>
@@ -32,7 +32,7 @@
             <td>@per.FechaPrimeraDosis</td>
             <td>@per.FechaSegundaDosis</td>
         </tr>
-        }
+        } *@
     </tbody>
 </table>
 
@@ -49,14 +49,14 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var prov in @GetProvincias())
+        @* @foreach(var prov in @GetProvincias())
         {
         
         <tr>
             <td>@prov.Id</td>
             <td>@prov.Nombre</td>
         </tr>
-        }
+        } *@
     </tbody>
 </table>
 
@@ -72,7 +72,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var vac in @GetVacunas())
+        @* @foreach(var vac in @GetVacunas())
         {
         
         <tr>
@@ -80,13 +80,13 @@
             <td>@vac.Marca</td>
             <td>@vac.Cantidad</td>
         </tr>
-        }
+        } *@
     </tbody>
 </table>
 
 
 @code{
-    List<Personas> GetPersonas() => svc.Personas.ToList();
+   /*List<Personas> GetPersonas() => svc.Personas.ToList();
    List<Provincias> GetProvincias() => svc.Provincias.ToList();
-   List<Vacunas> GetVacunas() => svc.Vacunas.ToList();
+   List<Vacunas> GetVacunas() => svc.Vacunas.ToList();*/
 }
