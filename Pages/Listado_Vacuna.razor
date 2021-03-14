@@ -1,92 +1,84 @@
 @page "/listadovacuna"
-@using Models;
+@using Registro_Vacunacion_EQNuGet.Models
 
-#region
-<h3>Listado de Vacunados por Personas</h3>
-<br>
-<table class= "table table-bordered table-dark">
+
+@{
+    var GetPersonas = from per in db.Personas
+                      join pro in db.Provincias
+                              on per.Provincia equals pro.Id
+                      select new
+                      {
+                          Personas = per,
+                          Provincias = pro,
+                      };
+
+    var GetVacunadosByProvincia = from per in db.Personas
+                                  join pro in db.Provincias
+                                  on per.Provincia equals pro.Id
+                                  group per by new { pro.Id, pro.Nombre } into g
+                                  select new
+                                  {
+                                      Provincia = g.Key.Nombre
+                                  };
+
+    var Filtro = GetPersonas.Where(p => p.Provincias.Nombre.ToLower().Contains(BuscarN.ToLower()));
+}
+
+
+
+<div class="container container-fluid">
+    <h2>Listado de vacunados por Provincia</h2>
+</div>
+
+<EditForm Model="true">
+
+    <div class="input-group mb-3">
+        <InputSelect @bind-Value="BuscarN" class="form-control">
+            @foreach (var p in db.Provincias.OrderBy(p => p.Nombre))
+            {
+                <option value="@p.Nombre">@p.Nombre</option>
+            }
+        </InputSelect>
+    </div>
+
+</EditForm>
+
+<span class="text-muted">
+    Showing @Filtro.Count() out of @GetPersonas.Count()
+</span>
+
+
+<table class="table table-bordered table-dark">
     <thead>
         <tr>
             <th>Cedula</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
+            <th>Nombre Completo</th>
             <th>Telefono</th>
-            <th>Fecha de Nacimiento</th>
-            <th>Vacuna Recibida</th>
-            <th>Primera Fecha de Dosis</th>
-            <th>Segunda Fecha de Dosis</th>
-            <th>Provincia</th>
+            <th>Primera Vacuna</th>
+            <th>Segunda Vacuna</th>
         </tr>
     </thead>
     <tbody>
-        @* @foreach(var per in @GetPersonas())
+        @foreach (var per in Filtro)
         {
-        
-        <tr>
-            <td>@per.Cedula</td>
-            <td>@per.Nombre</td>
-            <td>@per.Apellido</td>
-            <td>@per.Telefono</td>
-            <td>@per.FechaNacimiento</td>
-            <td>@per.VacunaRecibida</td>
-            <td>@per.FechaPrimeraDosis</td>
-            <td>@per.FechaSegundaDosis</td>
-        </tr>
-        } *@
+            <tr>
+                <td>@per.Personas.Cedula</td>
+                <td>@per.Personas.Nombre @per.Personas.Apellido</td>
+                <td>@per.Personas.Telefono</td>
+                <td>@per.Personas.FechaPrimeraDosis</td>
+                <td>@per.Personas.FechaSegundaDosis</td>
+            </tr>
+        }
     </tbody>
 </table>
 
 
-<h3>Listado de Vacunados por Provincias</h3>
-<br>
-<table class= "table table-bordered table-dark">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Vacunado</th>
 
-        </tr>
-    </thead>
-    <tbody>
-        @* @foreach(var prov in @GetProvincias())
-        {
-        
-        <tr>
-            <td>@prov.Id</td>
-            <td>@prov.Nombre</td>
-        </tr>
-        } *@
-    </tbody>
-</table>
-
-
-<h3>Listado de Vacunados por Vacunas</h3>
-<br>
-<table class= "table table-bordered table-dark">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Marca</th>
-            <th>Cantidad</th>
-        </tr>
-    </thead>
-    <tbody>
-        @* @foreach(var vac in @GetVacunas())
-        {
-        
-        <tr>
-            <td>@vac.Id</td>
-            <td>@vac.Marca</td>
-            <td>@vac.Cantidad</td>
-        </tr>
-        } *@
-    </tbody>
-</table>
 
 
 @code{
-   /*List<Personas> GetPersonas() => svc.Personas.ToList();
-   List<Provincias> GetProvincias() => svc.Provincias.ToList();
-   List<Vacunas> GetVacunas() => svc.Vacunas.ToList();*/
+    sistemavacunacionContext db = new();
+    //Personas persona = new();
+    string BuscarN { get; set; } = "";
+
 }
