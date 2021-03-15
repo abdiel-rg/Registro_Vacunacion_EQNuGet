@@ -1,6 +1,7 @@
 @page "/listadovacuna"
 @using Registro_Vacunacion_EQNuGet.Models
-
+@using MudBlazor.Services
+@using MudBlazor
 
 @{
     var GetPersonas = from per in db.Personas
@@ -72,13 +73,114 @@
     </tbody>
 </table>
 
+<br />
+<br />
 
 
+<div class="container container-fluid">
+    <h2 class="text-center">Listado de Vacunas</h2>
+</div>
 
+<br />
+<center>
+    <button class="btn btn-dark btn-group-vertical" @onclick="@DatosVacunas" @ondblclick="@Nada"> Click aqui</button>
+</center>
+<br />
+
+<table class="table table-bordered table-dark">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Vacuna</th>
+            <th>Vacunados</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vac in GetVacunas)
+        {
+            <tr>
+                <td>@vac["id"]</td>
+                <td>@vac["nvacuna"]</td>
+                <td>@vac["dvacuna"]</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<br />
+<br />
+
+
+<div class="container container-fluid">
+    <h2 class="text-center">Grafico del Listado de Vacunas</h2>
+</div>
+<br />
+<br />
+
+<div class="col-sm-9">
+
+    <MudChart ChartType="ChartType.Line" ChartSeries="@Series" Width="100%" Height="350px"></MudChart>
+
+</div>
 
 @code{
     sistemavacunacionContext db = new();
-    //Personas persona = new();
+    Personas persona = new();
     string BuscarN { get; set; } = "";
+    string[] Vacunas { get; set; }
 
+
+    //-----------------------------------------------------
+
+    List<Dictionary<string, string>> GetVacunas = new List<Dictionary<string, string>>();
+    public void DatosVacunas()
+    {
+        var mandato = from vac in db.Vacunas
+                      join per in db.Personas
+                      on vac.Id equals per.VacunaRecibida
+                      group new { vac, per } by new { vac.Id }
+                      into go
+                      select new
+                      {
+                          ID = go.Max(a => a.vac.Id),
+                          NVacuna = go.Max(a => a.vac.Marca),
+                          DVacuna = go.Count()
+                      };
+
+        foreach (var var in mandato)
+        {
+            var diccio = new Dictionary<string, string>();
+            diccio.Add("id", var.ID.ToString());
+            diccio.Add("nvacuna", var.NVacuna.ToString());
+            diccio.Add("dvacuna", var.DVacuna.ToString());
+            GetVacunas.Add(diccio);
+        }
+    }
+
+    public List<ChartSeries> Series = new List<ChartSeries>();
+    public ChartOptions Options = new ChartOptions();
+
+    protected override void OnInitialized()
+    {
+        double[] Data1 = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        double[] Data2 = { 1, 2, 3 };
+
+
+
+        Series.Add(new ChartSeries() { Name = "AstraZeneca", Data = Data1 });
+        Series.Add(new ChartSeries() { Name = "ModernaTX,", Data = Data2 });
+
+
+        Options.YAxisTicks = 100;
+
+        StateHasChanged();
+
+    }
+
+    public void Nada()
+    {
+
+    }
 }
+
+

@@ -12,6 +12,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Registro_Vacunacion_EQNuGet.Models;
 using FoolProof.Core;
+using MudBlazor.Services;
+
 
 namespace Registro_Vacunacion_EQNuGet
 {
@@ -32,6 +34,7 @@ namespace Registro_Vacunacion_EQNuGet
             services.AddServerSideBlazor();
             services.AddHttpClient();
             services.AddFoolProof();
+            services.AddMudServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
