@@ -1,1 +1,49 @@
-//Esta parte conllevara la configuracion
+@page "/configuracion"
+@using Registro_Vacunacion_EQNuGet.Models
+
+
+<h1>Configuracion</h1>
+
+<EditForm Model="vacuna" OnValidSubmit="post">
+
+
+
+	<div>
+	
+	</div>
+	<table class="table">
+		<tr>
+			<td>Marca:</td>
+			<td><input type="text" @bind="vacuna.Marca" /></td>
+		</tr>
+		<tr>
+			<td>Cantidad:</td>
+			<td><input type="text" @bind="vacuna.Cantidad" /></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center">
+				<input type="submit" value="Save" @onclick="post" />
+				<input type="submit" value="Cancelar"/>
+			</td>
+		</tr>
+	</table>
+	
+</EditForm>
+
+
+@code{
+	Vacunas vacuna = new ();
+
+
+	public void post()
+	{
+		using sistemavacunacionContext db = new();
+
+		db.Add(vacuna);
+		db.SaveChanges();
+		vacuna = db.Vacunas.First(x => x.Cantidad == vacuna.Cantidad);
+
+	}
+
+
+}
