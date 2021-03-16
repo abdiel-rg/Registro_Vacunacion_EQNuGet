@@ -1,0 +1,15 @@
+﻿@page "/anulovacuna"
+@using Registro_Vacunacion_EQNuGet.Data
+@using Registro_Vacunacion_EQNuGet.Models
+@inject NavigationManager NavManager
+
+@code {
+
+    async void Delete()
+    {
+        using sistemavacunacionContext db = new();
+
+        var query = new sistemavacunacionContext().Personas.Where(p => p.Cedula == persona.Cedula);
+
+    }
+}
